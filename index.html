@@ -1,0 +1,802 @@
+<!--
+  Smart Chicken Receipt – refined, professional version (fixed 3‑column grid)
+  Author: ChatGPT (2025‑06‑13)
+  Note: Saved‑record cards now lock to 3 per row on large screens,
+        2 per row on medium, and 1 per row on phones.
+-->
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>وەصڵی زیرەک</title>
+
+    <!-- Google Font optimised for Arabic/Kurdish script -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+      /* ============  Root Design Tokens  ============ */
+      :root {
+        /* palette */
+        --clr-primary-100: #d0eaff;
+        --clr-primary-500: #2196f3;
+        --clr-primary-600: #1976d2;
+        --clr-success-500: #2e7d32;
+        --clr-warning-100: #fff9c4;
+        --clr-danger-500: #d32f2f;
+        --clr-surface-100: #ffffff40; /* 25% white */
+        --clr-surface-200: #ffffff66; /* 40% white */
+        --clr-surface-300: #ffffff80; /* 50% white */
+        --radius-lg: 1rem;
+        --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.18);
+        --gradient-bg: linear-gradient(135deg, #a8edea, #fed6e3, #d299c2, #f6f0c4);
+      }
+
+      /* ============  Global Reset  ============ */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+     body {
+        margin: 0;
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 1.05rem;
+        background: var(--gradient-bg);
+        background-size: 600% 600%;
+        animation: bgMove 20s ease-in-out infinite;
+        color: #212121;
+        line-height: 1.5;
+        overflow-x: hidden;
+      }
+    
+    @keyframes moveBackground {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+      h1,
+      h2 {
+        margin: 0;
+        text-align: center;
+        color: #ffffff;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+      }
+
+      h1 {
+        font-size: clamp(1.8rem, 5vw, 3.2rem);
+        margin: 2rem 0 1rem;
+      }
+
+      h2 {
+        font-size: clamp(1.4rem, 4vw, 2.2rem);
+        color: var(--clr-primary-600);
+        margin-bottom: 1.5rem;
+      }
+
+      /* ============  Utility Classes  ============ */
+      .wrapper {
+        max-width: 1200px;
+        margin-inline: auto;
+        padding: 0 1rem 3rem;
+      }
+
+      .glass {
+        background: var(--clr-surface-100);
+        backdrop-filter: blur(14px);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 0.85rem 2.2rem;
+        color: #fff;
+        font-weight: 600;
+        border: none;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        background: var(--clr-primary-500);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+        transition: background 0.3s ease, transform 0.1s ease;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .btn:hover {
+        background: var(--clr-primary-600);
+        transform: translateY(-2px);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      /* ============  Hero Image  ============ */
+      .hero-image {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+      }
+
+      .hero-image img {
+        width: 20%;
+        max-height: 1000px;
+        object-fit: cover;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+      }
+
+      /* ============  Input Table  ============ */
+      .table-container {
+        padding: 2rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--clr-surface-200);
+        padding: 0.6rem;
+        text-align: center;
+        background-color: var(--clr-surface-100);
+      }
+
+      th {
+        background: var(--clr-surface-200);
+        font-weight: 700;
+      }
+
+      /* labels row background colours */
+      .orange {
+        background-color: #ffe0b2cc;
+      }
+      .yellow {
+        background-color: #fff9c4cc;
+      }
+      .lightblue {
+        background-color: #e0f7facc;
+      }
+      .cyan {
+        background-color: #b2ebf2cc;
+      }
+      .green {
+        background-color: #dcedc8cc;
+      }
+      .red {
+        background-color: #ffcdd2cc;
+      }
+
+      input[type="number"],
+      input[type="text"],
+      input[type="date"] {
+        width: 100%;
+        padding: 0.6rem 0.7rem;
+        font-size: 1rem;
+        border: 1px solid #ccd;
+        border-radius: 0.6rem;
+        text-align: center;
+        background: var(--clr-surface-300);
+      }
+
+      /* ============  Saved Records Section  ============ */
+      #savedRecordsSection {
+        margin-top: 3rem;
+        padding: 2rem;
+      }
+
+      /* NEW – fixed 3‑column grid on desktop */
+      #savedRecordsList {
+        display: grid;
+        gap: 1.2rem;
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      /* 2 columns on medium screens */
+      @media (max-width: 1024px) {
+        #savedRecordsList {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* 1 column on phones */
+      @media (max-width: 640px) {
+        #savedRecordsList {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .record-card {
+        position: relative;
+        padding: 1.25rem 1.5rem;
+        border-radius: var(--radius-lg);
+        background: linear-gradient(135deg, var(--clr-primary-100) 0%, #fff 100%);
+        box-shadow: var(--shadow-lg);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+
+      .record-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+      }
+
+      .record-card h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--clr-primary-600);
+        margin-bottom: 0.5rem;
+      }
+
+      .record-card .label {
+        font-weight: 600;
+        color: #333;
+      }
+
+      .record-card .value {
+        font-weight: normal;
+        color: #555;
+      }
+
+      .record-card .money {
+        color: var(--clr-danger-500);
+        font-weight: 700;
+      }
+
+      .delete-btn {
+        position: absolute;
+        top: 0.4rem;
+        left: 0.6rem;
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 50%;
+        background: var(--clr-danger-500);
+        color: #fff;
+        font-size: 1.2rem;
+        line-height: 32px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      .delete-btn:hover {
+        background: #b71c1c;
+      }
+
+      /* ============  Responsive Fixes for table padding ============ */
+      @media (max-width: 768px) {
+        .table-container {
+          padding: 1rem;
+        }
+
+        th,
+        td {
+          padding: 0.4rem;
+        }
+      }
+
+      /* ============  Live Clock  ============ */
+      #live-clock {
+  font-size: 80px; /* Change this value to make the time bigger or smaller */
+  font-family: 'Cairo', 'Calibri', Arial, sans-serif;
+  color: #1976d2;
+  font-weight: bold;
+  user-select: none;
+  letter-spacing: 0.08em;
+}
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+#clearInfoBtn {
+  background: #f44336 !important;
+  color: #fff !important;
+}
+#clearInfoBtn:hover, #clearInfoBtn:focus {
+  background: #b71c1c !important;
+  color: #fff !important;
+}
+textarea#noteInput:focus {
+  border: 1.5px solid #1976d2;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.10);
+}
+textarea#noteInput:hover {
+  border: 1.5px solid #2196f3;
+  background: #f1f7fd;
+}
+.cell-badge {
+  position: absolute;
+  top: 6px;
+  right: 8px;   /* <-- changed from left: 8px; */
+  left: auto;
+  background: #e3f2fd;
+  color: #1976d2;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 50%;
+  padding: 0.18em 0.65em;
+  box-shadow: 0 1px 4px rgba(25,118,210,0.08);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.85;
+  border: 1px solid #bbdefb;
+  transition: background 0.2s;
+}
+td:hover .cell-badge {
+  background: #bbdefb;
+}
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #savedRecordsSection,
+  #savedRecordsSection * {
+    visibility: visible !important;
+  }
+  #savedRecordsSection {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none !important;
+    background: none !important;
+    padding: 0 !important;
+    font-size: 0.8rem !important;
+    padding: 0.3rem 0.2rem !important;
+    max-width: 800px !important;
+    margin: 0 auto !important;
+  }
+  #savedRecordsList {
+    gap: 0.3rem !important;
+    grid-template-columns: 1fr 1fr 1fr !important; /* 3 columns per row */
+   
+  }
+  .record-card {
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.9em !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    box-shadow: none !important;
+      border: 1.5px solid #222 !important;
+  }
+  .btn-row,
+  #printBackupsBtn,
+  .delete-btn {
+    display: none !important;
+  }
+  #savedRecordsSection:empty,
+  #savedRecordsSection:empty * {
+    display: none !important;
+  }
+  #savedRecordsList:empty,
+  #savedRecordsList:empty * {
+    display: none !important;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <h1>وەصڵی زیرەک بۆ کاتی فرۆشتنی مریشک</h1>
+
+    <div class="hero-image">
+      <img src="Mreshk.JPG" alt="Nice Place" />
+    </div>
+
+    <!-- =====  Input Table  ===== -->
+    <section class="wrapper glass table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>کیلۆ</th>
+            <th>کیلۆ</th>
+            <th>کیلۆ</th>
+            <th>کیلۆ</th>
+          </tr>
+        </thead>
+        <tbody id="weightTable"></tbody>
+        <tfoot>
+          <tr class="cyan">
+            <td colspan="4">
+              <span class="label">ناوی تەواو</span>
+              <input type="text" id="fullNameInput" />
+            </td>
+          </tr>
+          <tr class="cyan">
+            <td colspan="4">
+              <span class="label">ژمارەی مۆبایل</span>
+              <input type="text" id="mobileInput" />
+            </td>
+          </tr>
+          <tr class="cyan">
+            <td colspan="4">
+              <span class="label">ژمارەی ئۆتۆمبێل</span>
+              <input type="text" id="carNumberInput" />
+            </td>
+          </tr>
+          <tr class="cyan">
+            <td colspan="4">
+              <span class="label">ناونیشان</span>
+              <input type="text" id="addressInput" />
+            </td>
+          </tr>
+          <tr class="cyan">
+            <td colspan="4">
+              <span class="label">ڕێکەوت</span>
+              <input type="date" id="dateInput" />
+            </td>
+          </tr>
+          <tr class="cyan">
+            <td colspan="4">
+              <span class="label">ژمارەی وەصڵ</span>
+              <input type="number" id="pageNumberInput" />
+            </td>
+          </tr>
+          <tr class="orange">
+            <td colspan="4">
+              <span class="label">نرخ</span>
+              <input type="number" id="priceInput" />
+            </td>
+          </tr>
+          <tr class="yellow">
+            <td colspan="4">
+              <span class="label">کێشی قەفەزی بەتاڵ</span>
+              <input type="number" id="emptyCageWeightInput" />
+            </td>
+          </tr>
+          <tr class="lightblue">
+            <td colspan="4">
+              <span class="label">ژمارەی قەفەزەکان</span>
+              <input type="number" id="numCagesInput" />
+            </td>
+          </tr>
+          <tr class="cyan">
+            <td colspan="4">
+              <span class="label">کۆی کێشی قەفەزە بەتاڵەکان</span>
+              <span id="totalEmptyWeight">0</span> کیلۆ
+            </td>
+          </tr>
+          <tr class="green">
+            <td colspan="4">
+              <span class="label">کۆی کێشی صافی</span>
+              <span id="netWeight">0</span> کیلۆ
+            </td>
+          </tr>
+          <tr class="red">
+            <td colspan="4">
+              <span class="label">کۆی گشتی پارە</span>
+              <span id="totalPrice">0</span> دینار
+            </td>
+          </tr>
+          <tr class="cyan">
+            <td colspan="4">
+              <label class="label" for="noteInput">تێبینی</label>
+              <input type="text" id="noteInput" />
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="btn-row">
+        <button type="button" class="btn" id="calcBtn">حیساب بکە</button>
+        <button type="button" class="btn" id="saveBtn">پاشەکەوت بکە</button>
+        <button type="button" class="btn" id="clearInfoBtn" style="background:#f44336;color:#fff;">پاککردنەوەی زانیاری</button>
+        <button type="button" class="btn" id="printBackupsBtn">چاپی وەصڵەکان</button>
+      </div>
+    </section>
+
+    <!-- =====  Saved Records  ===== -->
+    <section id="savedRecordsSection" class="wrapper glass">
+      <h2>وەصڵە پاشەکەوتکراوەکان</h2>
+      <div id="savedRecordsList"></div>
+      <div style="margin-top: 2rem; text-align: center; font-size: 1.25rem; font-weight: 700; color: var(--clr-success-500);">
+        کۆی گشتی پارەی هەموو وەصڵەکان:
+        <span id="allTotalMoney">0</span>
+        دینار
+      </div>
+    </section>
+
+    <!-- =====  Live Clock  ===== -->
+    <div id="live-clock" style="text-align: center; margin-top: 1rem; font-size: 1.5rem; color: #333;"></div>
+
+    <!-- =============================================================
+         JavaScript: dynamic rows, calculations, localStorage handling
+    ============================================================= -->
+    <script>
+      // At the top of your script, only once:
+const rows = 35;
+const cols = 4;
+
+// -------- Generate 35×4 input grid --------
+      // Generate 35x4 input grid with cell numbers (numbering top to bottom, then next column)
+const tableBody = document.getElementById("weightTable");
+tableBody.innerHTML = "";
+const row = 35;
+const col = 4;
+for (let i = 0; i < rows; i++) {
+  const row = document.createElement("tr");
+  for (let j = 0; j < cols; j++) {
+    const cell = document.createElement("td");
+    cell.style.position = "relative";
+    // Cell number: top to bottom, then next column
+    const cellNum = j * rows + i + 1;
+    const badge = document.createElement("span");
+    badge.textContent = cellNum;
+    badge.className = "cell-badge";
+    cell.appendChild(badge);
+    // Input
+    const input = document.createElement("input");
+    input.type = "number";
+    input.className = "kg-input";
+    input.min = "0";
+    input.step = "any";
+    input.style.textAlign = "center";
+    input.setAttribute("aria-label", "کیلۆ");
+    cell.appendChild(input);
+    row.appendChild(cell);
+  }
+  tableBody.appendChild(row);
+}
+
+// -------- Calculation Logic --------
+      function calculateTotals() {
+        const inputs = document.querySelectorAll(".kg-input");
+        let totalWeight = 0;
+        inputs.forEach((input) => {
+          totalWeight += parseFloat(input.value) || 0;
+        });
+
+        const price = parseFloat(document.getElementById("priceInput").value) || 0;
+        const emptyCageWeight = parseFloat(
+          document.getElementById("emptyCageWeightInput").value
+        ) || 0;
+        const numCages = parseFloat(document.getElementById("numCagesInput").value) || 0;
+
+        const totalEmptyWeight = emptyCageWeight * numCages;
+        const netWeight = totalWeight - totalEmptyWeight;
+        const totalPrice = netWeight * price;
+
+        document.getElementById("totalEmptyWeight").textContent = totalEmptyWeight.toFixed(2);
+        document.getElementById("netWeight").textContent = netWeight.toFixed(2);
+        document.getElementById("totalPrice").textContent = totalPrice.toLocaleString("en-US", {
+          maximumFractionDigits: 2,
+        });
+      }
+
+      // -------- Save Results to localStorage --------
+      let savedRecords = [];
+      const savedRecordsKey = "savedRecords_v1";
+
+      // Load on startup
+      document.addEventListener("DOMContentLoaded", () => {
+        const stored = localStorage.getItem(savedRecordsKey);
+        if (stored) {
+          try {
+            savedRecords = JSON.parse(stored);
+          } catch (e) {
+            console.warn("Corrupted localStorage – resetting.");
+            savedRecords = [];
+          }
+          renderSavedRecords();
+        }
+      });
+
+      document.getElementById("calcBtn").onclick = function() {
+  // Check required info fields
+  const fullName = document.getElementById("fullNameInput").value.trim();
+  const mobile = document.getElementById("mobileInput").value.trim();
+  const date = document.getElementById("dateInput").value.trim();
+  const price = document.getElementById("priceInput").value.trim();
+
+  if (!fullName || !mobile || !date || !price) {
+    alert("ناتوانرێت حیساب بکرێت! تکایە زانیاری گرنگەکان پڕبکەوە.");
+    return;
+  }
+  calculateTotals();
+};
+
+      function saveResults() {
+  const record = {
+    fullName: document.getElementById("fullNameInput").value.trim() || "---",
+    mobile: document.getElementById("mobileInput").value.trim() || "-",
+    carNumber: document.getElementById("carNumberInput").value.trim() || "-",
+    address: document.getElementById("addressInput").value.trim() || "-",
+    date: document.getElementById("dateInput").value || "-",
+    pageNumber: document.getElementById("pageNumberInput").value || "-",
+    price: document.getElementById("priceInput").value || "-",
+    emptyCageWeight: document.getElementById("emptyCageWeightInput").value || "-",
+    numCages: document.getElementById("numCagesInput").value || "-",
+    totalEmptyWeight: document.getElementById("totalEmptyWeight").textContent,
+    netWeight: document.getElementById("netWeight").textContent,
+    totalPrice: document.getElementById("totalPrice").textContent,
+    note: document.getElementById("noteInput").value.trim() || "-",
+  };
+
+  // Validation: require at least name, mobile, date, price, netWeight, totalPrice
+  if (
+    !record.fullName ||
+    record.fullName === "---" ||
+    !record.mobile ||
+    record.mobile === "-" ||
+    !record.date ||
+    record.date === "-" ||
+    !record.price ||
+    record.price === "-" ||
+    !record.netWeight ||
+    record.netWeight === "0.00" ||
+    !record.totalPrice ||
+    record.totalPrice === "0.00"
+  ) {
+    alert("تکایە هەموو زانیاری گرنگەکان پڕبکەوە و حیساب بکە پێش پاشەکەوتکردن!");
+    return;
+  }
+
+  savedRecords.push(record);
+  localStorage.setItem(savedRecordsKey, JSON.stringify(savedRecords));
+  renderSavedRecords();
+
+  // No message box after saving
+}
+
+      document.getElementById("saveBtn").onclick = saveResults;
+
+      function renderSavedRecords() {
+        const list = document.getElementById("savedRecordsList");
+        list.innerHTML = "";
+
+        let grandTotal = 0;
+        savedRecords.forEach((rec, idx) => {
+          const card = document.createElement("div");
+          card.className = "record-card";
+
+          // Double‑parse numeric comma‑formatted values
+          const numericPrice = parseFloat(String(rec.totalPrice).replace(/,/g, "")) || 0;
+          grandTotal += numericPrice;
+
+          card.innerHTML = `
+            <button class="delete-btn" title="سڕینەوە" onclick="deleteRecord(${idx})">&times;</button>
+            <h3>${rec.fullName}</h3>
+            <p><span class="label">ژمارەی مۆبایل:</span> <span class="value">${rec.mobile}</span></p>
+            <p><span class="label">ژمارەی ئۆتۆمبێل:</span> <span class="value">${rec.carNumber}</span></p>
+            <p><span class="label">ناونیشان:</span> <span class="value">${rec.address}</span></p>
+            <p><span class="label">ڕێکەوت:</span> <span class="value">${rec.date}</span></p>
+            <p><span class="label">ژمارەی وەصڵ:</span> <span class="value">${rec.pageNumber}</span></p>
+            <p><span class="label">نرخ:</span> <span class="value">${rec.price}</span></p>
+            <p><span class="label">کێشی قەفەزی بەتاڵ:</span> <span class="value">${rec.emptyCageWeight}</span></p>
+            <p><span class="label">ژمارەی قەفەزەکان:</span> <span class="value">${rec.numCages}</span></p>
+            <p><span class="label">کۆی کێشی قەفەزە بەتاڵەکان:</span> <span class="value">${rec.totalEmptyWeight}</span></p>
+            <p><span class="label">کۆی کێشی صافی:</span> <span class="value">${rec.netWeight}</span></p>
+            <p><span class="label">کۆی گشتی پارە:</span> <span class="money">${rec.totalPrice} دینار</span></p>
+            <p><span class="label">تێبینی:</span> <span class="value">${rec.note}</span></p>
+          `;
+          list.appendChild(card);
+        });
+
+        document.getElementById("allTotalMoney").textContent = grandTotal.toLocaleString("en-US", {
+          maximumFractionDigits: 2,
+        });
+        updatePrintButtonVisibility(); // Update print button visibility
+      }
+
+      function deleteRecord(idx) {
+        savedRecords.splice(idx, 1);
+        localStorage.setItem(savedRecordsKey, JSON.stringify(savedRecords));
+        renderSavedRecords();
+      }
+
+      // -------- Live Clock --------
+      function updateClock() {
+  const now = new Date();
+  // Format: HH:MM:SS AM/PM
+  const time = now.toLocaleTimeString('en-US', { hour12: true });
+  document.getElementById('live-clock').textContent = time;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+document.getElementById("clearInfoBtn").onclick = function() {
+  [
+    "fullNameInput",
+    "mobileInput",
+    "carNumberInput",
+    "addressInput",
+    "dateInput",
+    "pageNumberInput",
+    "priceInput",
+    "emptyCageWeightInput",
+    "numCagesInput",
+    "noteInput"
+  ].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  // Clear all kg-inputs
+  document.querySelectorAll(".kg-input").forEach(function(input) {
+    input.value = "";
+  });
+  document.getElementById("totalEmptyWeight").textContent = "0";
+  document.getElementById("netWeight").textContent = "0";
+  document.getElementById("totalPrice").textContent = "0";
+};
+
+// Move to next input on Enter key for all info fields
+[
+  "fullNameInput",
+  "mobileInput",
+  "carNumberInput",
+  "addressInput",
+  "dateInput",
+  "pageNumberInput",
+  "priceInput",
+  "emptyCageWeightInput",
+  "numCagesInput",
+  "noteInput"
+].forEach((id, idx, arr) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        // Focus next input if exists
+        if (arr[idx + 1]) {
+          const nextEl = document.getElementById(arr[idx + 1]);
+          if (nextEl) nextEl.focus();
+        }
+      }
+    });
+  }
+});
+
+// Move to next input on Enter key for all table (kg-input) boxes (top to bottom, then next column)
+const kgInputs = Array.from(document.querySelectorAll(".kg-input"));
+
+kgInputs.forEach((input, idx) => {
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const row = Math.floor(idx / cols);
+      const col = idx % cols;
+      // Move to next row in same column
+      if (row < rows - 1) {
+        const nextIdx = (row + 1) * cols + col;
+        if (kgInputs[nextIdx]) {
+          kgInputs[nextIdx].focus();
+        }
+      } else {
+        // If last row, move to first row of next column
+        const nextCol = col + 1;
+        if (nextCol < cols) {
+          const nextIdx = nextCol;
+          if (kgInputs[nextIdx]) {
+            kgInputs[nextIdx].focus();
+          }
+        }
+      }
+    }
+  });
+});
+
+document.getElementById("printBackupsBtn").onclick = function () {
+  window.print();
+};
+
+function updatePrintButtonVisibility() {
+  const list = document.getElementById('savedRecordsList');
+  const btn = document.getElementById('printBackupsBtn');
+  if (list.children.length === 0) {
+    btn.style.display = 'none';
+  } else {
+    btn.style.display = '';
+  }
+}
+// Call this function after rendering or updating saved records
+    </script>
+  </body>
+</html>
