@@ -381,10 +381,74 @@ td:hover .cell-badge {
     display: none !important;
   }
 }
+
+ .login-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(68, 139, 189, 0.269);
+        backdrop-filter: blur(6px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+      }
+
+      .login-card {
+        width: 90%;
+        max-width: 380px;
+        padding: 2.5rem 2.25rem 2rem;
+        text-align: center;
+      }
+
+      .login-card h2 {
+        margin-bottom: 1.5rem;
+        color: var(--clr-primary-600);
+      }
+
+      .login-card input[type="text"],
+      .login-card input[type="password"] {
+        width: 100%;
+        padding: 0.75rem 0.9rem;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        border-radius: 0.65rem;
+        border: 1px solid var(--clr-surface-200);
+        background: var(--clr-surface-300);
+        text-align: center;
+      }
+
+      .login-card input:focus {
+        outline: none;
+        border-color: var(--clr-primary-500);
+        background: #fff;
+        box-shadow: 0 0 0 2px rgba(33, 149, 243, 0.292);
+      }
+
+      .error-msg {
+        color: var(--clr-danger-500);
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+
+
+
+
+
     </style>
   </head>
   <body>
-    <h1>وەصڵی زیرەک بۆ کاتی فرۆشتنی مریشک</h1>
+    <div id="loginOverlay" class="login-overlay">
+      <form id="loginForm" class="glass login-card" autocomplete="off">
+        <h2>چوونەژوورەوە</h2>
+        <div id="errorMsg" class="error-msg" style="display:none;"></div>
+        <input type="text" id="username" placeholder="ناوی بەکارهێنەر" required />
+        <input type="password" id="password" placeholder="وشەی نهێنی" required />
+        <button type="submit" class="btn">چوونەژوورەوە</button>
+      </form>
+    </div>
+
+    <div id="appContent" style="opacity:1; transition: opacity 0.35s ease;">
+      <h1>وەصڵی زیرەک بۆ کاتی فرۆشتنی مریشک</h1>
 
     <div class="hero-image">
       <img src="Mreshk.JPG" alt="Nice Place" />
@@ -544,6 +608,7 @@ for (let i = 0; i < rows; i++) {
   }
   tableBody.appendChild(row);
 }
+
 
 // -------- Calculation Logic --------
       function calculateTotals() {
@@ -798,5 +863,41 @@ function updatePrintButtonVisibility() {
 }
 // Call this function after rendering or updating saved records
     </script>
+
+
+
+    <script>
+      const overlayEl = document.getElementById("loginOverlay");
+      const appContentEl = document.getElementById("appContent");
+      const errorMsgEl = document.getElementById("errorMsg");
+
+      function showOverlay() {
+        overlayEl.style.display = "flex";
+        appContentEl.style.opacity = "0.15";
+        document.body.style.overflow = "hidden";
+      }
+      function hideOverlay() {
+        overlayEl.style.display = "none";
+        appContentEl.style.opacity = "1";
+        document.body.style.overflow = "auto";
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        if (sessionStorage.getItem("loggedIn")==="true") hideOverlay(); else showOverlay();
+      });
+
+      document.getElementById("loginForm").addEventListener("submit", e => {
+        e.preventDefault();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        if (username==="MiranCS" && password==="558858") {
+          sessionStorage.setItem("loggedIn", "true");
+          hideOverlay();
+        } else {
+          errorMsgEl.textContent = "هەڵەیە. دووبارە هەوڵ بدە!";
+          errorMsgEl.style.display = "block";
+        }
+      }); </script>
+
   </body>
 </html>
