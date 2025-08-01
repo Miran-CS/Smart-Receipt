@@ -559,6 +559,12 @@ input[type="number"] {
               <input type="number" id="numCagesInput" />
             </td>
           </tr>
+          <tr class="lightblue">
+            <td colspan="4">
+              <span class="label">کۆی گشتی کیلۆ</span>
+              <span id="totalKilograms">0</span> کیلۆ
+            </td>
+          </tr>
           <tr class="cyan">
             <td colspan="4">
               <span class="label">کۆی کێشی قەفەزە بەتاڵەکان</span>
@@ -666,6 +672,7 @@ for (let i = 0; i < rows; i++) {
         const netWeight = totalWeight - totalEmptyWeight;
         const totalPrice = netWeight * price;
 
+        document.getElementById("totalKilograms").textContent = totalWeight.toFixed(2);
         document.getElementById("totalEmptyWeight").textContent = totalEmptyWeight.toFixed(2);
         document.getElementById("netWeight").textContent = netWeight.toFixed(2);
         document.getElementById("totalPrice").textContent = totalPrice.toLocaleString("en-US", {
@@ -716,6 +723,7 @@ for (let i = 0; i < rows; i++) {
     price: document.getElementById("priceInput").value || "-",
     emptyCageWeight: document.getElementById("emptyCageWeightInput").value || "-",
     numCages: document.getElementById("numCagesInput").value || "-",
+    totalKilograms: document.getElementById("totalKilograms").textContent,
     totalEmptyWeight: document.getElementById("totalEmptyWeight").textContent,
     netWeight: document.getElementById("netWeight").textContent,
     totalPrice: document.getElementById("totalPrice").textContent,
@@ -774,6 +782,7 @@ for (let i = 0; i < rows; i++) {
             <p><span class="label">نرخ:</span> <span class="value">${rec.price}</span></p>
             <p><span class="label">کێشی قەفەزی بەتاڵ:</span> <span class="value">${rec.emptyCageWeight}</span></p>
             <p><span class="label">ژمارەی قەفەزەکان:</span> <span class="value">${rec.numCages}</span></p>
+            <p><span class="label">کۆی گشتی کیلۆ:</span> <span class="value">${rec.totalKilograms || '-'}</span></p>
             <p><span class="label">کۆی کێشی قەفەزە بەتاڵەکان:</span> <span class="value">${rec.totalEmptyWeight}</span></p>
             <p><span class="label">کۆی کێشی صافی:</span> <span class="value">${rec.netWeight}</span></p>
             <p><span class="label">کۆی گشتی پارە:</span> <span class="money">${rec.totalPrice} دینار</span></p>
@@ -825,6 +834,7 @@ document.getElementById("clearInfoBtn").onclick = function() {
   document.querySelectorAll(".kg-input").forEach(function(input) {
     input.value = "";
   });
+  document.getElementById("totalKilograms").textContent = "0";
   document.getElementById("totalEmptyWeight").textContent = "0";
   document.getElementById("netWeight").textContent = "0";
   document.getElementById("totalPrice").textContent = "0";
